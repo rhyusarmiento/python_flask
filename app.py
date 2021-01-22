@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os
@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config["SQLALCHEMY_DATABASE"] = "sqlite:///" + os.path.join(basedir, "app.sqlite")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.sqlite')
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
@@ -19,13 +19,28 @@ class Guide(db.Model):
         self.title = title
         self.content = content
 
+
 class GuideSchema(ma.Schema):
-    class Meta: 
+    class Meta:
         fields = ('title', 'content')
 
 
 guide_schema = GuideSchema()
 guides_schema = GuideSchema(many=True)
+
+# Endpoint to create a new guide
+@app.route('/guide', methods = ["POST"])
+def add_guide():
+    title = request.json['title']
+    content = request.json['title']
+
+    new_guide = Guide(title, content)
+    db.session.add(new_guide)
+    db.session.commit()
+
+    guide = Guide.query.get(new_guide.id)
+
+    return guide_schema.jsonify(guide)
 
 if __name__ == "__main__":
     app.run(debug = True)
