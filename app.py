@@ -22,7 +22,7 @@ class Guide(db.Model):
 
 class GuideSchema(ma.Schema):
     class Meta:
-        fields = ('title', 'content')
+        fields = ('title', 'content', 'id')
 
 
 guide_schema = GuideSchema()
